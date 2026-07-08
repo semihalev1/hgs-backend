@@ -1,16 +1,17 @@
 package com.hgs.backend.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionRequest {
+
     private String plate;
     private String stationName;
     private Double fee;
 
-    public String getPlate() { return plate; }
-    public void setPlate(String plate) { this.plate = plate; }
-
-    public String getStationName() { return stationName; }
-    public void setStationName(String stationName) { this.stationName = stationName; }
-
-    public Double getFee() { return fee; }
-    public void setFee(Double fee) { this.fee = fee; }
 }
