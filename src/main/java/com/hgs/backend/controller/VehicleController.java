@@ -5,6 +5,7 @@ import com.hgs.backend.dto.VehicleResponse;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.service.VehicleService;
 import com.hgs.backend.util.VehicleHelper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class VehicleController {
     private final VehicleHelper vehicleHelper;
 
     @PostMapping
-    public ResponseEntity<VehicleResponse> addVehicle(@RequestBody VehicleRequest request) {
+    public ResponseEntity<VehicleResponse> addVehicle(@Valid @RequestBody VehicleRequest request) {
         Vehicle vehicle = vehicleHelper.convertToEntity(request);
         Vehicle savedVehicle = vehicleService.addVehicle(vehicle);
         return ResponseEntity.ok(vehicleHelper.convertToResponse(savedVehicle));
@@ -44,14 +45,14 @@ public class VehicleController {
     }
 
     @PutMapping("/{plate}")
-    public ResponseEntity<VehicleResponse> updateVehicle(@PathVariable String plate, @RequestBody VehicleRequest request) {
+    public ResponseEntity<VehicleResponse> updateVehicle(@PathVariable String plate, @Valid @RequestBody VehicleRequest request) {
         Vehicle vehicleData = vehicleHelper.convertToEntity(request);
         Vehicle updatedVehicle = vehicleService.updateVehicle(plate, vehicleData);
         return ResponseEntity.ok(vehicleHelper.convertToResponse(updatedVehicle));
     }
 
     @PatchMapping("/{plate}/balance")
-    public ResponseEntity<VehicleResponse> updateBalance(@PathVariable String plate, @RequestBody com.hgs.backend.dto.BalanceUpdateRequest request) {
+    public ResponseEntity<VehicleResponse> updateBalance(@PathVariable String plate, @Valid @RequestBody com.hgs.backend.dto.BalanceUpdateRequest request) {
         Vehicle updatedVehicle = vehicleService.updateBalance(plate, request.getNewBalance());
         return ResponseEntity.ok(vehicleHelper.convertToResponse(updatedVehicle));
     }

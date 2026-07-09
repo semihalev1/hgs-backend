@@ -1,5 +1,6 @@
 package com.hgs.backend.service;
 
+import com.hgs.backend.exception.VehicleNotFoundException;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class VehicleService {
 
     public Vehicle getVehicleByPlate(String plate) {
         return vehicleRepository.findByPlate(plate)
-                .orElseThrow(() -> new RuntimeException("Sistemde bu plakaya ait bir araç bulunamadı: " + plate));
+                .orElseThrow(() -> new VehicleNotFoundException(plate+" plakalı araç bulunamadı"));
     }
 
     public List<Vehicle> getAllVehicles() {

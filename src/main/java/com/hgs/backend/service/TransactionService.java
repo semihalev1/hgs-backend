@@ -1,9 +1,11 @@
 package com.hgs.backend.service;
 
 import com.hgs.backend.dto.TransactionRequest;
+import com.hgs.backend.exception.InsufficientBalanceException;
 import com.hgs.backend.model.Transaction;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.repository.TransactionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -15,11 +17,12 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final VehicleService vehicleService;
 
+    @Transactional
     public Transaction createTransaction(TransactionRequest request) {
         Vehicle vehicle = vehicleService.getVehicleByPlate(request.getPlate());
 
         if (vehicle.getBalance() < request.getFee()) {
-            throw new RuntimeException("Yetersiz bakiye! Geçiş reddedildi. Mevcut bakiye: " + vehicle.getBalance());
+            throw new InsufficientBalanceException("Yetersiz Bakiye! Mevcut bakiye: "+vehicle.getBalance());
         }
 
         vehicle.setBalance(vehicle.getBalance() - request.getFee());
