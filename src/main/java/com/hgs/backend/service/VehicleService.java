@@ -1,5 +1,6 @@
 package com.hgs.backend.service;
 
+import com.hgs.backend.exception.VehicleAlreadyExistException;
 import com.hgs.backend.exception.VehicleNotFoundException;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.repository.VehicleRepository;
@@ -14,6 +15,9 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
 
     public Vehicle addVehicle(Vehicle vehicle) {
+        if(vehicleRepository.existsByPlate(vehicle.getPlate())){
+            throw new VehicleAlreadyExistException(vehicle.getPlate()+" plakalı araç sistemde kayıtlı.");
+        }
         return vehicleRepository.save(vehicle);
     }
 
