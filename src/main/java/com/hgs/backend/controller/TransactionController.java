@@ -22,18 +22,11 @@ public class TransactionController {
 
     @PostMapping("/transaction")
     public ResponseEntity<TransactionResponse> createTransaction(@Valid @RequestBody TransactionRequest request) {
-        Transaction newTransaction = transactionService.createTransaction(request);
-        return ResponseEntity.ok(transactionHelper.convertToResponse(newTransaction));
+        return ResponseEntity.ok(transactionService.createTransaction(request));
     }
 
     @GetMapping("/vehicles/{plate}/transaction")
     public ResponseEntity<List<TransactionResponse>> getTransactionsByPlate(@PathVariable String plate) {
-        List<Transaction> transactions = transactionService.getTransactionsByPlate(plate);
-
-        List<TransactionResponse> responseList = transactions.stream()
-                .map(transactionHelper::convertToResponse)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(responseList);
+        return ResponseEntity.ok(transactionService.getTransactionsByPlate(plate));
     }
 }

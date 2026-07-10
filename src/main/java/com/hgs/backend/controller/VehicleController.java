@@ -18,43 +18,30 @@ import java.util.stream.Collectors;
 public class VehicleController {
 
     private final VehicleService vehicleService;
-    private final VehicleHelper vehicleHelper;
 
     @PostMapping
     public ResponseEntity<VehicleResponse> addVehicle(@Valid @RequestBody VehicleRequest request) {
-        Vehicle vehicle = vehicleHelper.convertToEntity(request);
-        Vehicle savedVehicle = vehicleService.addVehicle(vehicle);
-        return ResponseEntity.ok(vehicleHelper.convertToResponse(savedVehicle));
+        return ResponseEntity.ok(vehicleService.addVehicle(request));
     }
 
     @GetMapping("/{plate}")
     public ResponseEntity<VehicleResponse> getVehicleByPlate(@PathVariable String plate) {
-        Vehicle foundVehicle = vehicleService.getVehicleByPlate(plate);
-        return ResponseEntity.ok(vehicleHelper.convertToResponse(foundVehicle));
+        return ResponseEntity.ok(vehicleService.getVehicleByPlate(plate));
     }
 
     @GetMapping
     public ResponseEntity<List<VehicleResponse>> getAllVehicles() {
-        List<Vehicle> allVehicles = vehicleService.getAllVehicles();
-
-        List<VehicleResponse> responseList = allVehicles.stream()
-                .map(vehicleHelper::convertToResponse)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(responseList);
+        return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
 
     @PutMapping("/{plate}")
     public ResponseEntity<VehicleResponse> updateVehicle(@PathVariable String plate, @Valid @RequestBody VehicleRequest request) {
-        Vehicle vehicleData = vehicleHelper.convertToEntity(request);
-        Vehicle updatedVehicle = vehicleService.updateVehicle(plate, vehicleData);
-        return ResponseEntity.ok(vehicleHelper.convertToResponse(updatedVehicle));
+        return ResponseEntity.ok(vehicleService.updateVehicle(plate, request));
     }
 
     @PatchMapping("/{plate}/balance")
     public ResponseEntity<VehicleResponse> updateBalance(@PathVariable String plate, @Valid @RequestBody com.hgs.backend.dto.BalanceUpdateRequest request) {
-        Vehicle updatedVehicle = vehicleService.updateBalance(plate, request.getNewBalance());
-        return ResponseEntity.ok(vehicleHelper.convertToResponse(updatedVehicle));
+        return ResponseEntity.ok(vehicleService.updateBalance(plate, request.getNewBalance()));
     }
 
     @DeleteMapping("/{plate}")

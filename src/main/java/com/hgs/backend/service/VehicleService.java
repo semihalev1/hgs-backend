@@ -1,52 +1,72 @@
 package com.hgs.backend.service;
 
+import com.hgs.backend.dto.VehicleRequest;
+import com.hgs.backend.dto.VehicleResponse;
 import com.hgs.backend.exception.VehicleAlreadyExistException;
 import com.hgs.backend.exception.VehicleNotFoundException;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.repository.VehicleRepository;
+import com.hgs.backend.util.VehicleHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
+    private final VehicleHelper vehicleHelper;
 
-    public Vehicle addVehicle(Vehicle vehicle) {
-        if(vehicleRepository.existsByPlate(vehicle.getPlate())){
-            throw new VehicleAlreadyExistException(vehicle.getPlate()+" plakalı araç sistemde kayıtlı.");
+    public VehicleResponse addVehicle(VehicleRequest vehicleRequest) {
+        if(vehicleRepository.existsByPlate(vehicleRequest.getPlate())){
+            throw new VehicleAlreadyExistException(vehicleRequest.getPlate()+" plakalı araç sistemde kayıtlı.");
         }
-        return vehicleRepository.save(vehicle);
+        Vehicle vehicle = vehicleHelper.convertToEntity(vehicleRequest);
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
+        return vehicleHelper.convertToResponse(savedVehicle);
     }
-
-    public Vehicle getVehicleByPlate(String plate) {
+    public Vehicle getVehicleEntity(String plate) {
         return vehicleRepository.findByPlate(plate)
-                .orElseThrow(() -> new VehicleNotFoundException(plate+" plakalı araç bulunamadı"));
+                .orElseThrow(() -> new VehicleNotFoundException(plate + " plakalı araç bulunamadı"));
     }
 
-    public List<Vehicle> getAllVehicles() {
-        return vehicleRepository.findAll();
+    public VehicleResponse getVehicleByPlate(String plate) {
+        Vehicle vehicle = getVehicleEntity(plate);
+        return vehicleHelper.convertToResponse(vehicle);
     }
 
-    public Vehicle updateVehicle(String plate, Vehicle updatedVehicleData) {
-        Vehicle existingVehicle = getVehicleByPlate(plate);
-        existingVehicle.setOwnerName(updatedVehicleData.getOwnerName());
-        existingVehicle.setVehicleClass(updatedVehicleData.getVehicleClass());
-        existingVehicle.setBalance(updatedVehicleData.getBalance());
-        return vehicleRepository.save(existingVehicle);
+    public List<VehicleResponse> getAllVehicles() {
+        return vehicleRepository.findAll()
+                .stream()
+                .map(vehicleHelper::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-    public Vehicle updateBalance(String plate, Double newBalance) {
-        Vehicle existingVehicle = getVehicleByPlate(plate);
+    public VehicleResponse updateVehicle(String plate, VehicleRequest request) {
+        Vehicle existingVehicle = getVehicleEntity(plate);
+
+        existingVehicle.setOwnerName(request.getOwnerName());
+        existingVehicle.setVehicleClass(request.getVehicleClass());
+        existingVehicle.setBalance(request.getBalance());
+
+        Vehicle updatedVehicle = vehicleRepository.save(existingVehicle);
+
+        return vehicleHelper.convertToResponse(updatedVehicle);
+    }
+
+    public VehicleResponse updateBalance(String plate, Double newBalance) {
+        Vehicle existingVehicle = getVehicleEntity(plate);
         existingVehicle.setBalance(newBalance);
-        return vehicleRepository.save(existingVehicle);
+        Vehicle updatedVehicle = vehicleRepository.save(existingVehicle);
+        return vehicleHelper.convertToResponse(updatedVehicle);
     }
 
     @org.springframework.transaction.annotation.Transactional
     public void deleteVehicle(String plate) {
-        Vehicle existingVehicle = getVehicleByPlate(plate);
+        Vehicle existingVehicle = getVehicleEntity(plate);
         vehicleRepository.delete(existingVehicle);
     }
 }
