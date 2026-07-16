@@ -7,6 +7,7 @@ import com.hgs.backend.exception.VehicleNotFoundException;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.repository.VehicleRepository;
 import com.hgs.backend.util.VehicleHelper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,7 @@ public class VehicleService {
         return vehicleHelper.convertToResponse(updatedVehicle);
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void deleteVehicle(String plate) {
         Vehicle existingVehicle = getVehicleEntity(plate);
         vehicleRepository.delete(existingVehicle);
