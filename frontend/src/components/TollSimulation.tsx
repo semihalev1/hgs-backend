@@ -59,7 +59,6 @@ function TollSimulation({ vehicles, onRefresh }: Props) {
           `Kesilen: ${values.fee.toFixed(2)} ₺`
       );
       form.resetFields();
-      // Bakiyeler değişti; App'teki tek listeyi tazele → her iki sekme de güncellenir
       onRefresh();
     } catch (error) {
       setErrorMsg(extractErrorMessage(error));
