@@ -15,7 +15,7 @@ export interface VehicleRequest {
   ownerName: string;
 }
 
-export interface BalanceUpdateRequest {
+export interface BalanceLoadRequest {
   newBalance: number;
 }
 
@@ -32,6 +32,14 @@ export const vehicleService = {
 
   deleteVehicle: async (plate: string) => {
     const response = await api.delete(`/vehicles/${plate}`);
+    return response.data;
+  },
+
+  loadBalance: async (plate: string, amount: number) => {
+    const response = await api.patch<VehicleResponse>(
+      `/vehicles/${plate}/balance`,
+      { amount }
+    );
     return response.data;
   },
 };

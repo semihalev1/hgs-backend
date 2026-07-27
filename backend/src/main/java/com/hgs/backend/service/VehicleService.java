@@ -58,9 +58,9 @@ public class VehicleService {
         return vehicleHelper.convertToResponse(updatedVehicle);
     }
 
-    public VehicleResponse updateBalance(String plate, Double newBalance) {
+    public VehicleResponse loadBalance(String plate, Double amount) {
         Vehicle existingVehicle = getVehicleEntity(plate);
-        existingVehicle.setBalance(newBalance);
+        existingVehicle.setBalance(existingVehicle.getBalance() + amount);
         Vehicle updatedVehicle = vehicleRepository.save(existingVehicle);
         return vehicleHelper.convertToResponse(updatedVehicle);
     }

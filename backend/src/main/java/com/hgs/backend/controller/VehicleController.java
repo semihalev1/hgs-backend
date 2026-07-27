@@ -40,8 +40,8 @@ public class VehicleController {
     }
 
     @PatchMapping("/{plate}/balance")
-    public ResponseEntity<VehicleResponse> updateBalance(@PathVariable String plate, @Valid @RequestBody com.hgs.backend.dto.BalanceUpdateRequest request) {
-        return ResponseEntity.ok(vehicleService.updateBalance(plate, request.getNewBalance()));
+    public ResponseEntity<VehicleResponse> loadBalance(@PathVariable String plate, @Valid @RequestBody com.hgs.backend.dto.BalanceLoadRequest request) {
+        return ResponseEntity.ok(vehicleService.loadBalance(plate, request.getAmount()));
     }
 
     @DeleteMapping("/{plate}")
