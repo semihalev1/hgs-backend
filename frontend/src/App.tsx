@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { Tabs, Typography, Space, message } from "antd";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { Tabs, Typography, Space, Spin, message } from "antd";
 import type { TabsProps } from "antd";
 import {
   vehicleService,
@@ -14,6 +14,9 @@ import {
   type VehicleClassResponse,
 } from "./services/vehicleClassService";
 
+const AnalyticsDashboard = lazy(
+  () => import("./components/analytics/AnalyticsDashboard")
+);
 const { Title } = Typography;
 
 function App() {
@@ -25,27 +28,8 @@ function App() {
   );
   const [referencesLoading, setReferencesLoading] = useState(true);
 
-  const fetchReferenceData = useCallback(async () => {
-    try {
-      setReferencesLoading(true);
-
-      const [gateData, vehicleClassData] = await Promise.all([
-        gateService.getAllGates(),
-        vehicleClassService.getAllVehicleClasses(),
-      ]);
-
-      setGates(gateData);
-      setVehicleClasses(vehicleClassData);
-    } catch {
-      message.error("Gişe ve araç sınıfı bilgileri yüklenemedi.");
-    } finally {
-      setReferencesLoading(false);
-    }
-  }, []);
-
   const fetchVehicles = useCallback(async () => {
     try {
-      setLoading(true);
       const data = await vehicleService.getAllVehicles();
       setVehicles(data);
     } catch {
@@ -56,9 +40,51 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetchVehicles();
-    fetchReferenceData();
-  }, [fetchVehicles, fetchReferenceData]);
+    let cancelled = false;
+
+    void vehicleService
+      .getAllVehicles()
+      .then((data) => {
+        if (!cancelled) {
+          setVehicles(data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          message.error("Araçlar yüklenirken backend'e ulaşılamadı.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    void Promise.all([
+      gateService.getAllGates(),
+      vehicleClassService.getAllVehicleClasses(),
+    ])
+      .then(([gateData, vehicleClassData]) => {
+        if (!cancelled) {
+          setGates(gateData);
+          setVehicleClasses(vehicleClassData);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          message.error("Gişe ve araç sınıfı bilgileri yüklenemedi.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setReferencesLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const items: TabsProps["items"] = [
     {
@@ -86,10 +112,33 @@ function App() {
         />
       ),
     },
+    {
+      key: "analytics",
+      label: "Analiz ve Raporlama",
+      destroyOnHidden: true,
+      children: (
+        <Suspense
+          fallback={
+            <div
+              style={{
+                minHeight: 320,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Spin size="large" tip="Analiz ekranı yükleniyor..." />
+            </div>
+          }
+        >
+          <AnalyticsDashboard />
+        </Suspense>
+      ),
+    },
   ];
 
   return (
-    <div style={{ padding: "50px" }}>
+    <div style={{ padding: "clamp(16px, 4vw, 50px)" }}>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Title level={2}>HGS Yönetim Paneli</Title>
         <Tabs defaultActiveKey="vehicles" items={items} />

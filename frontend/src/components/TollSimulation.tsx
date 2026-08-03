@@ -51,21 +51,19 @@ function TollSimulation({ vehicles, gates, gatesLoading, onRefresh }: Props) {
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const selectedPlate = Form.useWatch("plate", form);
   const selectedGateId = Form.useWatch("gateId", form);
+  const quoteMatchesSelection =
+    quote !== null &&
+    quote.vehiclePlate === selectedPlate &&
+    quote.gateId === selectedGateId;
 
   useEffect(() => {
     if (!selectedPlate || !selectedGateId) {
-      setQuote(null);
-      setQuoteError(null);
       return;
     }
 
     let cancelled = false;
 
     const fetchQuote = async () => {
-      setQuote(null);
-      setQuoteError(null);
-      setQuoteLoading(true);
-
       try {
         const result = await tariffService.getQuote({
           plate: selectedPlate,
@@ -94,6 +92,17 @@ function TollSimulation({ vehicles, gates, gatesLoading, onRefresh }: Props) {
   }, [selectedPlate, selectedGateId]);
 
   const handleFinish = async (values: TransactionRequest) => {
+    if (
+      !quote ||
+      quote.vehiclePlate !== values.plate ||
+      quote.gateId !== values.gateId
+    ) {
+      setErrorMsg(
+        "Seçilen araç ve gişe için güncel tarife henüz hesaplanmadı."
+      );
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg(null);
     try {
@@ -106,6 +115,7 @@ function TollSimulation({ vehicles, gates, gatesLoading, onRefresh }: Props) {
       form.resetFields();
       setQuote(null);
       setQuoteError(null);
+      setQuoteLoading(false);
       onRefresh();
     } catch (error) {
       setErrorMsg(extractErrorMessage(error));
@@ -128,7 +138,16 @@ function TollSimulation({ vehicles, gates, gatesLoading, onRefresh }: Props) {
           />
         )}
 
-        <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+          onValuesChange={(_, values) => {
+            setQuote(null);
+            setQuoteError(null);
+            setQuoteLoading(Boolean(values.plate && values.gateId));
+          }}
+        >
           <Form.Item
             label="Araç (Plaka)"
             name="plate"
@@ -164,39 +183,40 @@ function TollSimulation({ vehicles, gates, gatesLoading, onRefresh }: Props) {
                 label: gate.name,
               }))}
             />
-            {quoteLoading && (
-              <Alert
-                type="info"
-                message="Geçiş ücreti hesaplanıyor..."
-                showIcon
-              />
-            )}
-
-            {quoteError && (
-              <Alert
-                type="error"
-                message="Tarife hesaplanamadı"
-                description={quoteError}
-                showIcon
-              />
-            )}
-
-            {quote && (
-              <Alert
-                type="success"
-                message={`Ödenecek ücret: ${quote.fee.toFixed(2)} ₺`}
-                description={`${quote.vehicleClassName} — ${quote.gateName}`}
-                showIcon
-              />
-            )}
           </Form.Item>
+
+          {quoteLoading && (
+            <Alert
+              type="info"
+              message="Geçiş ücreti hesaplanıyor..."
+              showIcon
+            />
+          )}
+
+          {quoteError && (
+            <Alert
+              type="error"
+              message="Tarife hesaplanamadı"
+              description={quoteError}
+              showIcon
+            />
+          )}
+
+          {quoteMatchesSelection && quote && (
+            <Alert
+              type="success"
+              message={`Ödenecek ücret: ${quote.fee.toFixed(2)} ₺`}
+              description={`${quote.vehicleClassName} — ${quote.gateName}`}
+              showIcon
+            />
+          )}
 
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               loading={submitting}
-              disabled={!quote || quoteLoading}
+              disabled={!quoteMatchesSelection || quoteLoading}
               block
             >
               Geçiş Yap
