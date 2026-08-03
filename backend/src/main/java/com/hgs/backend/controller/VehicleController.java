@@ -1,7 +1,8 @@
 package com.hgs.backend.controller;
 
-import com.hgs.backend.dto.VehicleRequest;
-import com.hgs.backend.dto.VehicleResponse;
+import com.hgs.backend.dto.vehicle.BalanceLoadRequest;
+import com.hgs.backend.dto.vehicle.VehicleRequest;
+import com.hgs.backend.dto.vehicle.VehicleResponse;
 import com.hgs.backend.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class VehicleController {
     }
 
     @PatchMapping("/{plate}/balance")
-    public ResponseEntity<VehicleResponse> loadBalance(@PathVariable String plate, @Valid @RequestBody com.hgs.backend.dto.BalanceLoadRequest request) {
+    public ResponseEntity<VehicleResponse> loadBalance(@PathVariable String plate, @Valid @RequestBody BalanceLoadRequest request) {
         return ResponseEntity.ok(vehicleService.loadBalance(plate, request.getAmount()));
     }
 

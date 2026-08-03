@@ -4,18 +4,21 @@ import type { TabsProps } from "antd";
 import {
   vehicleService,
   type VehicleResponse,
-} from "./services/vehicleService";
-import VehicleManagement from "./components/VehicleManagement";
-import TollSimulation from "./components/TollSimulation";
-import { gateService, type GateResponse } from "./services/gateService";
+} from "./features/vehicles/services/vehicleService";
+import VehicleManagement from "./features/vehicles/components/VehicleManagement";
+import TollSimulation from "./features/simulation/components/TollSimulation";
+import {
+  gateService,
+  type GateResponse,
+} from "./features/simulation/services/gateService";
 
 import {
   vehicleClassService,
   type VehicleClassResponse,
-} from "./services/vehicleClassService";
+} from "./features/vehicles/services/vehicleClassService";
 
 const AnalyticsDashboard = lazy(
-  () => import("./components/analytics/AnalyticsDashboard")
+  () => import("./features/analytics/components/AnalyticsDashboard")
 );
 const { Title } = Typography;
 

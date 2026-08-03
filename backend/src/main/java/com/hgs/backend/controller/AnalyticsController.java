@@ -1,7 +1,7 @@
 package com.hgs.backend.controller;
 
-import com.hgs.backend.dto.GateRevenueResponse;
-import com.hgs.backend.dto.VehicleClassTrafficResponse;
+import com.hgs.backend.dto.analytics.GateRevenueResponse;
+import com.hgs.backend.dto.analytics.VehicleClassTrafficResponse;
 import com.hgs.backend.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

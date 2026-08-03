@@ -1,6 +1,6 @@
 package com.hgs.backend.controller;
 
-import com.hgs.backend.dto.GateResponse;
+import com.hgs.backend.dto.gate.GateResponse;
 
 import com.hgs.backend.service.GateService;
 import lombok.RequiredArgsConstructor;

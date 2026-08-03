@@ -1,7 +1,7 @@
 package com.hgs.backend.controller;
 
-import com.hgs.backend.dto.TariffQuoteRequest;
-import com.hgs.backend.dto.TariffQuoteResponse;
+import com.hgs.backend.dto.tariff.TariffQuoteRequest;
+import com.hgs.backend.dto.tariff.TariffQuoteResponse;
 import com.hgs.backend.service.TariffService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.hgs.backend.controller;
 
-import com.hgs.backend.dto.TransactionRequest;
-import com.hgs.backend.dto.TransactionResponse;
+import com.hgs.backend.dto.transaction.TransactionRequest;
+import com.hgs.backend.dto.transaction.TransactionResponse;
 import com.hgs.backend.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,11 +1,11 @@
 package com.hgs.backend.service;
 
-import com.hgs.backend.dto.TransactionRequest;
-import com.hgs.backend.dto.TransactionResponse;
+import com.hgs.backend.dto.transaction.TransactionRequest;
+import com.hgs.backend.dto.transaction.TransactionResponse;
 import com.hgs.backend.exception.InsufficientBalanceException;
 import com.hgs.backend.model.*;
 import com.hgs.backend.repository.TransactionRepository;
-import com.hgs.backend.util.TransactionHelper;
+import com.hgs.backend.mapper.TransactionMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final VehicleService vehicleService;
-    private final TransactionHelper transactionHelper;
+    private final TransactionMapper transactionMapper;
     private final GateService gateService;
     private final TariffService tariffService;
 
@@ -42,13 +42,13 @@ public class TransactionService {
         transaction.setVehicle(vehicle);
 
         Transaction savedTransaction = transactionRepository.save(transaction);
-        return transactionHelper.convertToResponse(savedTransaction);
+        return transactionMapper.convertToResponse(savedTransaction);
     }
 
     public List<TransactionResponse> getTransactionsByPlate(String plate) {
         return transactionRepository.findByVehicle_PlateOrderByTransactionDateDesc(plate)
                 .stream()
-                .map(transactionHelper::convertToResponse)
+                .map(transactionMapper::convertToResponse)
                 .toList();
 
     }

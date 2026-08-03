@@ -1,10 +1,10 @@
 package com.hgs.backend.service;
 
-import com.hgs.backend.dto.VehicleClassResponse;
+import com.hgs.backend.dto.vehicle.VehicleClassResponse;
+import com.hgs.backend.mapper.VehicleClassMapper;
 import com.hgs.backend.exception.VehicleClassNotFoundException;
 import com.hgs.backend.model.VehicleClass;
 import com.hgs.backend.repository.VehicleClassRepository;
-import com.hgs.backend.util.VehicleClassHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public class VehicleClassService {
 
     private final VehicleClassRepository vehicleClassRepository;
-    private final VehicleClassHelper vehicleClassHelper;
+    private final VehicleClassMapper vehicleClassMapper;
 
     public VehicleClass getVehicleClassEntity (Long id) {
         return vehicleClassRepository.findById(id)
@@ -25,7 +25,7 @@ public class VehicleClassService {
     public List<VehicleClassResponse> getAllVehicleClasses() {
         return vehicleClassRepository.findAllByOrderByCodeAsc()
                 .stream()
-                .map(vehicleClassHelper::convertToResponse)
+                .map(vehicleClassMapper::convertToResponse)
                 .toList();
     }
 

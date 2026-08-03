@@ -1,6 +1,6 @@
 package com.hgs.backend.controller;
 
-import com.hgs.backend.dto.VehicleClassResponse;
+import com.hgs.backend.dto.vehicle.VehicleClassResponse;
 import com.hgs.backend.service.VehicleClassService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

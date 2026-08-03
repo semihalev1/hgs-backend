@@ -1,13 +1,13 @@
 package com.hgs.backend.service;
 
-import com.hgs.backend.dto.VehicleRequest;
-import com.hgs.backend.dto.VehicleResponse;
+import com.hgs.backend.dto.vehicle.VehicleRequest;
+import com.hgs.backend.dto.vehicle.VehicleResponse;
+import com.hgs.backend.mapper.VehicleMapper;
 import com.hgs.backend.exception.VehicleAlreadyExistException;
 import com.hgs.backend.exception.VehicleNotFoundException;
 import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.model.VehicleClass;
 import com.hgs.backend.repository.VehicleRepository;
-import com.hgs.backend.util.VehicleHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.List;
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
-    private final VehicleHelper vehicleHelper;
+    private final VehicleMapper vehicleMapper;
     private final VehicleClassService vehicleClassService;
 
     @Transactional
@@ -30,10 +30,10 @@ public class VehicleService {
 
         VehicleClass vehicleClass = vehicleClassService.getVehicleClassEntity(request.getVehicleClassId());
 
-        Vehicle vehicle = vehicleHelper.convertToEntity(request, vehicleClass);
+        Vehicle vehicle = vehicleMapper.convertToEntity(request, vehicleClass);
 
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
-        return vehicleHelper.convertToResponse(savedVehicle);
+        return vehicleMapper.convertToResponse(savedVehicle);
     }
 
     public Vehicle getVehicleEntity(String plate) {
@@ -43,13 +43,13 @@ public class VehicleService {
 
     public VehicleResponse getVehicleByPlate(String plate) {
         Vehicle vehicle = getVehicleEntity(plate);
-        return vehicleHelper.convertToResponse(vehicle);
+        return vehicleMapper.convertToResponse(vehicle);
     }
 
     public List<VehicleResponse> getAllVehicles() {
         return vehicleRepository.findAllByOrderByPlateAsc()
                 .stream()
-                .map(vehicleHelper::convertToResponse)
+                .map(vehicleMapper::convertToResponse)
                 .toList();
     }
 
@@ -64,7 +64,7 @@ public class VehicleService {
         existingVehicle.setBalance(request.getBalance());
 
         Vehicle updatedVehicle = vehicleRepository.save(existingVehicle);
-        return vehicleHelper.convertToResponse(updatedVehicle);
+        return vehicleMapper.convertToResponse(updatedVehicle);
     }
 
     @Transactional
@@ -74,7 +74,7 @@ public class VehicleService {
         existingVehicle.setBalance(existingVehicle.getBalance().add(amount));
 
         Vehicle updatedVehicle = vehicleRepository.save(existingVehicle);
-        return vehicleHelper.convertToResponse(updatedVehicle);
+        return vehicleMapper.convertToResponse(updatedVehicle);
     }
 
     @Transactional
