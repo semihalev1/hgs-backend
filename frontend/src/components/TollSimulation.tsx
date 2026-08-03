@@ -1,14 +1,21 @@
-import { useState } from "react";
-import { Form, Select, InputNumber, Button, Alert, Space, message } from "antd";
+import { useEffect, useState } from "react";
+import { Form, Select, Button, Alert, Space, message } from "antd";
 import axios from "axios";
 import { type VehicleResponse } from "../services/vehicleService";
 import {
   transactionService,
   type TransactionRequest,
 } from "../services/transactionService";
+import type { GateResponse } from "../services/gateService";
+import {
+  tariffService,
+  type TariffQuoteResponse,
+} from "../services/tariffService";
 
 interface Props {
   vehicles: VehicleResponse[];
+  gates: GateResponse[];
+  gatesLoading: boolean;
   onRefresh: () => void;
 }
 
@@ -16,15 +23,6 @@ interface ProblemDetailResponse {
   detail?: string;
   hatalar?: string[];
 }
-
-const TOLL_GATES = [
-  "Çamlıca Gişesi",
-  "FSM Köprüsü",
-  "15 Temmuz Şehitler Köprüsü",
-  "Yavuz Sultan Selim Köprüsü",
-  "Osmangazi Köprüsü",
-  "Avrasya Tüneli",
-];
 
 function extractErrorMessage(error: unknown): string {
   if (axios.isAxiosError<ProblemDetailResponse>(error)) {
@@ -44,10 +42,56 @@ function extractErrorMessage(error: unknown): string {
   return "Geçiş işlemi sırasında beklenmeyen bir hata oluştu.";
 }
 
-function TollSimulation({ vehicles, onRefresh }: Props) {
+function TollSimulation({ vehicles, gates, gatesLoading, onRefresh }: Props) {
   const [form] = Form.useForm<TransactionRequest>();
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [quote, setQuote] = useState<TariffQuoteResponse | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const selectedPlate = Form.useWatch("plate", form);
+  const selectedGateId = Form.useWatch("gateId", form);
+
+  useEffect(() => {
+    if (!selectedPlate || !selectedGateId) {
+      setQuote(null);
+      setQuoteError(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchQuote = async () => {
+      setQuote(null);
+      setQuoteError(null);
+      setQuoteLoading(true);
+
+      try {
+        const result = await tariffService.getQuote({
+          plate: selectedPlate,
+          gateId: selectedGateId,
+        });
+
+        if (!cancelled) {
+          setQuote(result);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setQuoteError(extractErrorMessage(error));
+        }
+      } finally {
+        if (!cancelled) {
+          setQuoteLoading(false);
+        }
+      }
+    };
+
+    fetchQuote();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPlate, selectedGateId]);
 
   const handleFinish = async (values: TransactionRequest) => {
     setSubmitting(true);
@@ -55,10 +99,13 @@ function TollSimulation({ vehicles, onRefresh }: Props) {
     try {
       const result = await transactionService.createTransaction(values);
       message.success(
-        `${result.vehiclePlate} plakalı araç ${values.stationName} gişesinden geçti. ` +
-          `Kesilen: ${values.fee.toFixed(2)} ₺`
+        `${result.vehiclePlate} plakalı araç ` +
+          `${result.gateName} gişesinden geçti. ` +
+          `Kesilen: ${result.fee.toFixed(2)} ₺`
       );
       form.resetFields();
+      setQuote(null);
+      setQuoteError(null);
       onRefresh();
     } catch (error) {
       setErrorMsg(extractErrorMessage(error));
@@ -100,40 +147,58 @@ function TollSimulation({ vehicles, onRefresh }: Props) {
 
           <Form.Item
             label="Gişe"
-            name="stationName"
-            rules={[{ required: true, message: "Lütfen bir gişe seçin." }]}
-          >
-            <Select
-              placeholder="Gişe seçin"
-              options={TOLL_GATES.map((gate) => ({
-                value: gate,
-                label: gate,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Geçiş Ücreti"
-            name="fee"
+            name="gateId"
             rules={[
-              { required: true, message: "Geçiş ücreti zorunludur." },
               {
-                type: "number",
-                min: 1,
-                message: "Ücret 0'dan büyük olmalıdır.",
+                required: true,
+                message: "Lütfen bir gişe seçin.",
               },
             ]}
           >
-            <InputNumber
-              min={1}
-              style={{ width: "100%" }}
-              addonAfter="₺"
-              placeholder="Örn: 45"
+            <Select
+              placeholder="Gişe seçin"
+              loading={gatesLoading}
+              disabled={gatesLoading}
+              options={gates.map((gate) => ({
+                value: gate.id,
+                label: gate.name,
+              }))}
             />
+            {quoteLoading && (
+              <Alert
+                type="info"
+                message="Geçiş ücreti hesaplanıyor..."
+                showIcon
+              />
+            )}
+
+            {quoteError && (
+              <Alert
+                type="error"
+                message="Tarife hesaplanamadı"
+                description={quoteError}
+                showIcon
+              />
+            )}
+
+            {quote && (
+              <Alert
+                type="success"
+                message={`Ödenecek ücret: ${quote.fee.toFixed(2)} ₺`}
+                description={`${quote.vehicleClassName} — ${quote.gateName}`}
+                showIcon
+              />
+            )}
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={submitting} block>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submitting}
+              disabled={!quote || quoteLoading}
+              block
+            >
               Geçiş Yap
             </Button>
           </Form.Item>

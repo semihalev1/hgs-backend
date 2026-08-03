@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Form, Input, InputNumber, Button, Alert } from "antd";
+import { Form, Input, InputNumber, Button, Alert, Select } from "antd";
 import axios from "axios";
 import {
   vehicleService,
   type VehicleRequest,
 } from "../services/vehicleService";
+import type { VehicleClassResponse } from "../services/vehicleClassService";
 
 interface Props {
+  vehicleClasses: VehicleClassResponse[];
+  loading: boolean;
   onVehicleAdded: () => void;
 }
 
@@ -42,7 +45,11 @@ function extractErrorMessage(error: unknown): string {
   return "Araç eklenirken beklenmeyen bir hata oluştu.";
 }
 
-export default function VehicleForm({ onVehicleAdded }: Props) {
+export default function VehicleForm({
+  vehicleClasses,
+  loading,
+  onVehicleAdded,
+}: Props) {
   const [form] = Form.useForm<VehicleRequest>();
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -93,10 +100,23 @@ export default function VehicleForm({ onVehicleAdded }: Props) {
 
         <Form.Item
           label="Araç Sınıfı"
-          name="vehicleClass"
-          rules={[{ required: true, message: "Araç sınıfı zorunludur." }]}
+          name="vehicleClassId"
+          rules={[
+            {
+              required: true,
+              message: "Araç sınıfı zorunludur.",
+            },
+          ]}
         >
-          <Input placeholder="Örn: Otomobil, Kamyon..." />
+          <Select
+            placeholder="Araç sınıfı seçin"
+            loading={loading}
+            disabled={loading}
+            options={vehicleClasses.map((vehicleClass) => ({
+              value: vehicleClass.id,
+              label: vehicleClass.name,
+            }))}
+          />
         </Form.Item>
 
         <Form.Item
@@ -117,7 +137,13 @@ export default function VehicleForm({ onVehicleAdded }: Props) {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={submitting} block>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={submitting}
+            disabled={loading || vehicleClasses.length === 0}
+            block
+          >
             Aracı Ekle
           </Button>
         </Form.Item>

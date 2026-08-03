@@ -7,12 +7,41 @@ import {
 } from "./services/vehicleService";
 import VehicleManagement from "./components/VehicleManagement";
 import TollSimulation from "./components/TollSimulation";
+import { gateService, type GateResponse } from "./services/gateService";
+
+import {
+  vehicleClassService,
+  type VehicleClassResponse,
+} from "./services/vehicleClassService";
 
 const { Title } = Typography;
 
 function App() {
   const [vehicles, setVehicles] = useState<VehicleResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [gates, setGates] = useState<GateResponse[]>([]);
+  const [vehicleClasses, setVehicleClasses] = useState<VehicleClassResponse[]>(
+    []
+  );
+  const [referencesLoading, setReferencesLoading] = useState(true);
+
+  const fetchReferenceData = useCallback(async () => {
+    try {
+      setReferencesLoading(true);
+
+      const [gateData, vehicleClassData] = await Promise.all([
+        gateService.getAllGates(),
+        vehicleClassService.getAllVehicleClasses(),
+      ]);
+
+      setGates(gateData);
+      setVehicleClasses(vehicleClassData);
+    } catch {
+      message.error("Gişe ve araç sınıfı bilgileri yüklenemedi.");
+    } finally {
+      setReferencesLoading(false);
+    }
+  }, []);
 
   const fetchVehicles = useCallback(async () => {
     try {
@@ -28,7 +57,8 @@ function App() {
 
   useEffect(() => {
     fetchVehicles();
-  }, [fetchVehicles]);
+    fetchReferenceData();
+  }, [fetchVehicles, fetchReferenceData]);
 
   const items: TabsProps["items"] = [
     {
@@ -37,7 +67,9 @@ function App() {
       children: (
         <VehicleManagement
           vehicles={vehicles}
+          vehicleClasses={vehicleClasses}
           loading={loading}
+          referencesLoading={referencesLoading}
           onRefresh={fetchVehicles}
         />
       ),
@@ -46,7 +78,12 @@ function App() {
       key: "simulation",
       label: "HGS Geçiş Simülasyonu",
       children: (
-        <TollSimulation vehicles={vehicles} onRefresh={fetchVehicles} />
+        <TollSimulation
+          vehicles={vehicles}
+          gates={gates}
+          gatesLoading={referencesLoading}
+          onRefresh={fetchVehicles}
+        />
       ),
     },
   ];

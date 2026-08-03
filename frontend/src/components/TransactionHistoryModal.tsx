@@ -34,8 +34,13 @@ const columns: ColumnsType<TransactionResponse> = [
   },
   {
     title: "Gişe",
-    dataIndex: "stationName",
-    key: "stationName",
+    dataIndex: "gateName",
+    key: "gateName",
+  },
+  {
+    title: "Araç sınıfı",
+    dataIndex: "vehicleClassName",
+    key: "vehicleClassName",
   },
   {
     title: "Ücret",

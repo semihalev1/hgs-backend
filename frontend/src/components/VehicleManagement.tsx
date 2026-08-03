@@ -8,10 +8,13 @@ import {
 import VehicleForm from "./VehicleForm";
 import LoadBalanceModal from "./LoadBalanceModal";
 import TransactionHistoryModal from "./TransactionHistoryModal";
+import type { VehicleClassResponse } from "../services/vehicleClassService";
 
 interface Props {
   vehicles: VehicleResponse[];
+  vehicleClasses: VehicleClassResponse[];
   loading: boolean;
+  referencesLoading: boolean;
   onRefresh: () => void;
 }
 
@@ -27,7 +30,11 @@ const getColumns = (
     render: (text: string) => <b>{text}</b>,
   },
   { title: "Sahibi", dataIndex: "ownerName", key: "ownerName" },
-  { title: "Araç sınıfı", dataIndex: "vehicleClass", key: "vehicleClass" },
+  {
+    title: "Araç sınıfı",
+    dataIndex: "vehicleClassName",
+    key: "vehicleClassName",
+  },
   {
     title: "Bakiye",
     dataIndex: "balance",
@@ -62,7 +69,13 @@ const getColumns = (
   },
 ];
 
-function VehicleManagement({ vehicles, loading, onRefresh }: Props) {
+function VehicleManagement({
+  vehicles,
+  vehicleClasses,
+  loading,
+  referencesLoading,
+  onRefresh,
+}: Props) {
   const [selectedVehicle, setSelectedVehicle] =
     useState<VehicleResponse | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -101,7 +114,11 @@ function VehicleManagement({ vehicles, loading, onRefresh }: Props) {
 
   return (
     <Space direction="vertical" size="large" style={{ width: "100%" }}>
-      <VehicleForm onVehicleAdded={onRefresh} />
+      <VehicleForm
+        vehicleClasses={vehicleClasses}
+        loading={referencesLoading}
+        onVehicleAdded={onRefresh}
+      />
       <Table
         dataSource={vehicles}
         columns={getColumns(handleDelete, handleOpenModal, handleShowHistory)}

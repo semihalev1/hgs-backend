@@ -11,14 +11,15 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehicleResponse {
+public class TariffQuoteResponse {
 
-    private Long id;
-    private String plate;
+    private String vehiclePlate;
     private Long vehicleClassId;
     private String vehicleClassCode;
     private String vehicleClassName;
-    private BigDecimal balance;
-    private String ownerName;
+    private Long gateId;
+    private String gateCode;
+    private String gateName;
+    private BigDecimal fee;
 
 }

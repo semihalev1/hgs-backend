@@ -3,20 +3,22 @@ import api from "./api";
 export interface VehicleResponse {
   id: number;
   plate: string;
-  vehicleClass: string;
+  vehicleClassId: number;
+  vehicleClassCode: string;
+  vehicleClassName: string;
   balance: number;
   ownerName: string;
 }
 
 export interface VehicleRequest {
   plate: string;
-  vehicleClass: string;
+  vehicleClassId: number;
   balance: number;
   ownerName: string;
 }
 
 export interface BalanceLoadRequest {
-  newBalance: number;
+  amount: number;
 }
 
 export const vehicleService = {

@@ -2,16 +2,13 @@ package com.hgs.backend.controller;
 
 import com.hgs.backend.dto.VehicleRequest;
 import com.hgs.backend.dto.VehicleResponse;
-import com.hgs.backend.model.Vehicle;
 import com.hgs.backend.service.VehicleService;
-import com.hgs.backend.util.VehicleHelper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/vehicles")

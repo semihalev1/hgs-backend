@@ -2,29 +2,33 @@ import api from "./api";
 
 export interface TransactionRequest {
   plate: string;
-  stationName: string;
-  fee: number;
+  gateId: number;
 }
 
 export interface TransactionResponse {
   id: number;
-  stationName: string;
+  gateId: number;
+  gateCode: string;
+  gateName: string;
   fee: number;
   transactionDate: string;
   vehiclePlate: string;
+  vehicleClassId: number;
+  vehicleClassCode: string;
+  vehicleClassName: string;
 }
 
 export const transactionService = {
   createTransaction: async (request: TransactionRequest) => {
     const response = await api.post<TransactionResponse>(
-      "/transaction",
+      "/transactions",
       request
     );
     return response.data;
   },
   getTransactionsByPlate: async (plate: string) => {
     const response = await api.get<TransactionResponse[]>(
-      `/vehicles/${plate}/transaction`
+      `/vehicles/${plate}/transactions`
     );
     return response.data;
   },
